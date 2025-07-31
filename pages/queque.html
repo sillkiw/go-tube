@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Queque Status</title>
+    <link rel="stylesheet" href="./static/w3.css">
+</head>
+<body>
+  <div class="w3-container w3-blue w3-bottombar ">
+      <header class="w3-container w3-blue w3-responsive">
+             <h1 class="w3-center">GoTube<img src="./static/GoTube32x32.png" width="32" height="32" alt="GoTube Logo"></h1>
+      </header>
+  </div>
+<div class="w3-center w3-bar w3-blue w3-bottombar">
+  <a href="/lst" class="w3-bar-item w3-button w3-round-xxlarge w3-mobile">Video List</a>
+  <a href="/Send" class="w3-bar-item w3-button w3-round-xxlarge w3-mobile">Upload Video</a>
+  <a href="/queque" class="w3-bar-item w3-button w3-round-xxlarge w3-mobile">Processing Queque status</a>
+  <a href="/editconfig" class="w3-bar-item w3-button w3-round-xxlarge w3-mobile">Admin Panel</a>
+</div>
+<h5 class="w3-center">Conversion jobs currently in queue: <span class="w3-badge">{{.QuequeSize}}</span></p></h5>
+       <footer class="w3-container w3-blue w3-responsive">
+        <h5 class="w3-center"><a href="https://github.com/jackyes/GoTube"><img src="/static/github-mark.png" width="32" height="32" alt="GitHub Logo"> GoTube </a> </h5>
+      </footer>
+</body>
+</html>
+
