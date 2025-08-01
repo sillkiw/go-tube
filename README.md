@@ -60,7 +60,7 @@ go-tube/
 
 ---
 
-## Installation
+## Build Docker image
 
 1) Clone Repository
 
@@ -68,14 +68,16 @@ go-tube/
 git clone https://github.com/sillkiw/go-tube.git
 cd go-tube
 ```
-2) Build
+2) Create Docker container
 ```sh
-go build -o gotube ./cmd/web
+docker build -t <name-container> .  
+```
+3) Run container
+```sh
+docker run -p 8085:8085 <name-container>
 ```
 
-3) Run locally
-```sh
-./gotube
-```
+## Frameworks
+FFMpeg, MP4Box
 
 
