@@ -4,6 +4,7 @@
 A self-hosted, Go-based video streaming application inspired by YouTube’s core functionality. GoTube enables secure video upload, on-the-fly processing, and modern, responsive playback.
 
 ---
+
 ## Screenshots
 
 
@@ -36,6 +37,7 @@ GoTube is designed to provide a straightforward, performant platform for video h
 - **Docker Ready**: Provided Dockerfile for containerized deployment.
 
 ---
+
 ## Project structure
 ```bash
 go-tube/
@@ -77,6 +79,8 @@ docker build -t <name-container> .
 ```sh
 docker run -p 8085:8085 <name-container>
 ```
+
+---
 
 ## Frameworks
 FFMpeg, MP4Box
