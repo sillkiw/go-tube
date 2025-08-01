@@ -1,4 +1,4 @@
-<img width="1378" height="1036" alt="image" src="https://github.com/user-attachments/assets/1f591cbe-7787-4516-afca-3e7acc99b99f" />
+
 # GoTube
 
 A self-hosted, Go-based video streaming application inspired by YouTube’s core functionality. GoTube enables secure video upload, on-the-fly processing, and modern, responsive playback.
