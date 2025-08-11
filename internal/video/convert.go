@@ -171,8 +171,8 @@ func (s *Service) convertVideo() {
 	}
 }
 
+// create_noaudio_file creates a flag file so that the MPD generator knows about the absence of audio
 func (s *Service) create_noaudio_file(task task) {
-	// Create a flag file so that the MPD generator knows about the absence of audio
 	flagPath := filepath.Join(task.outputPath, task.baseName+"noaudio.txt")
 	if ferr := os.WriteFile(flagPath, nil, 0644); ferr != nil {
 		s.logger.Error("failed to write noaudio flag",

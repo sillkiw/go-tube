@@ -23,5 +23,5 @@ func (app *Application) render(w http.ResponseWriter, name string, data any) {
 
 func (app *Application) renderError(w http.ResponseWriter, msg string) {
 	data := &templates.PageErr{ErrMsg: msg}
-	app.render(w, "error.html", data)
+	app.render(w, "error", data)
 }

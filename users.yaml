@@ -2,9 +2,9 @@
 #To change the default password use "mkpasswd -m bcrypt -R 10 <new_password>" and insert the output in password field.
 #Then use <new_password> to login on Web UI
 - username: admin
-  password: $2b$10$dGoqtmmtVyulYpVqOSYDMORobcfzzW2C.gCj4GvSiZ5u1RXXuBhRS
+  password: $2b$10$ttKlmxHi/acISLJvouKCKe39Nrsgwtqr8wL36NgaQRpgL6GpQJc8W
   role: admin
 
 - username: user1
-  password: $2b$10$dGoqtmmtVyulYpVqOSYDMORobcfzzW2C.gCj4GvSiZ5u1RXXuBhRS
+  password: $2b$10$/U6bJFPBNF5qK.ahSPYkwOJf496ydiqvc08wy1U.1IqlCVCEeuS/m
   role: user

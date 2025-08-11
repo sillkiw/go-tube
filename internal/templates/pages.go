@@ -1,17 +1,16 @@
 package templates
 
-import "time"
+import (
+	"gotube/internal/utils"
+)
 
-type folderInfo struct {
-	Name    string
-	ModTime time.Time
-}
 type PageList struct {
-	Files     []folderInfo
+	Files     []utils.FolderInfo
+	Page      int
 	PrevPage  int
 	NextPage  int
 	TotalPage int
-	CanDelete int
+	CanDelete bool
 }
 type PageQueque struct {
 	QuequeSize int

@@ -20,6 +20,7 @@ upload:
 
 video:
   convert_path:     "./converted"
+  perpage:          10 #Nr of displayed video per page in Video list
   delete_original:  true
   delete_old:
     enabled:        false
@@ -46,12 +47,12 @@ video:
     allow_embed: true
 
 ui:
-  users_file_path: "./users.yaml"
-  template_dir:    "./ui/html"
+  template_dir:    "./pages"
   static_path:     "./static"
   favicon:         "./static/favicon.ico"
 
 auth:
+  users_file_path: "./users.yaml"
   upload_allowed_roles:   ["admin", "user"]
   view_allowed_roles:     ["admin", "user"]
   delete_allowed_roles:   ["admin"]

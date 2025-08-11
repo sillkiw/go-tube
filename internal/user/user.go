@@ -12,20 +12,17 @@ type User struct {
 	Role     string `yaml:"role"`
 }
 
-var Users []User
-
 // LoadUsersFromFile loads users from a YAML file and stores them in the global Users slice.
-func LoadUsersFromFile(path string) error {
+func LoadUsersFromFile(path string) ([]User, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var loaded []User
 	if err := yaml.Unmarshal(data, &loaded); err != nil {
-		return err
+		return nil, err
 	}
 
-	Users = loaded
-	return nil
+	return loaded, nil
 }

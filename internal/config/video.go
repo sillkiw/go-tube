@@ -44,6 +44,7 @@ type FFmpegConfig struct {
 // AllowEmbed toggles iframe embedding support
 type VideoConfig struct {
 	ConvertPath    string           `yaml:"convert_path"`
+	PerPage        int              `yaml:"perpage"`
 	DeleteOriginal bool             `yaml:"delete_original"`
 	DeleteOld      DeleteOldPolicy  `yaml:"delete_old"`
 	Resolutions    ResolutionConfig `yaml:"resolutions"`

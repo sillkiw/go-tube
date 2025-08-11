@@ -21,13 +21,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type folderInfo struct {
-	Name    string
-	ModTime time.Time
-}
-
-type folderInfos []folderInfo
-
 // Login handles basic HTTP authentication: it retrieves the username and password,
 // checks them against users.yaml, and sets a signed cookie on success. Login handles requests to the /auth endpoint.
 func (app *Application) login(w http.ResponseWriter, r *http.Request) {
@@ -45,9 +38,9 @@ func (app *Application) login(w http.ResponseWriter, r *http.Request) {
 
 	// Find the user with the given username
 	var currentUser *user.User
-	for i := range user.Users {
-		if user.Users[i].Username == username {
-			currentUser = &user.Users[i]
+	for i := range app.users {
+		if app.users[i].Username == username {
+			currentUser = &app.users[i]
 			break
 		}
 	}
@@ -211,63 +204,54 @@ func (app *Application) showUploadForm(w http.ResponseWriter, r *http.Request) {
 // listFolderHandler handles GET /lst (and /) requests, paginates video folders,
 // and renders the filelist template.
 func (app *Application) listFolderHandler(w http.ResponseWriter, r *http.Request) {
-	// 1. Only allow GET
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
-	// 2. Parse page query (default 1)
 	page := 1
 	if p := r.URL.Query().Get("page"); p != "" {
 		if n, err := strconv.Atoi(p); err == nil && n > 0 {
 			page = n
 		}
 	}
-
-	// 3. List folders with pagination
 	dir := app.config.Video.ConvertPath
 	perPage := app.config.Video.PerPage
 	folders, total, err := listFolders(dir, page, perPage)
 	if err != nil {
-		app.renderError(w, http.StatusBadRequest, err.Error())
+		app.logger.Error("Failed to read video directory",
+			slog.String("error", err.Error()),
+		)
+		app.renderError(w, "No video available")
 		return
 	}
-
-	// 4. Compute total pages
 	totalPages := (total + perPage - 1) / perPage
 
-	// 5. Prepare template data
-	data := &PageList{
+	data := &templates.PageList{
 		Files:     folders,
 		Page:      page,
 		TotalPage: totalPages,
 		PrevPage:  max(1, page-1),
 		NextPage:  min(totalPages, page+1),
-		CanDelete: cookie.AdminAuthenticated(r),
+		CanDelete: app.canDeleteQ(r, app.config.Auth.DeleteAllowedRoles),
 	}
-
-	// 6. Render
 	app.render(w, "filelist", data)
 }
 
-// listFolders reads all subdirectories of dirPath, sorts them by mod time descending,
-// and returns only the slice for the requested page, along with the total count.
-func listFolders(dirPath string, page, perPage int) ([]folderInfo, int, error) {
+func listFolders(dirPath string, page, perPage int) ([]utils.FolderInfo, int, error) {
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return nil, 0, fmt.Errorf("cannot read video directory: %w", err)
 	}
 
 	// Filter and collect folderInfo
-	infos := make([]folderInfo, 0, len(entries))
+	infos := make([]utils.FolderInfo, 0, len(entries))
 	for _, e := range entries {
 		if e.IsDir() {
 			fi, err := e.Info()
 			if err != nil {
 				continue // skip unreadable
 			}
-			infos = append(infos, folderInfo{
+			infos = append(infos, utils.FolderInfo{
 				Name:    e.Name(),
 				ModTime: fi.ModTime(),
 			})
@@ -297,146 +281,26 @@ func listFolders(dirPath string, page, perPage int) ([]folderInfo, int, error) {
 	return infos[start:end], total, nil
 }
 
-// Helpers
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
+func (app *Application) faviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, app.config.UI.Favicon)
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
+func (app *Application) quequeSize(w http.ResponseWriter, r *http.Request) {
+	p := &templates.PageQueque{
+		QuequeSize: int(app.videoSrv.GetQueueLen()),
 	}
-	return b
-}
-
-// func listFolderHandler(w http.ResponseWriter, r *http.Request) {
-// 	pageNum := 1
-// 	if page, err := strconv.Atoi(r.FormValue("page")); err == nil && page > 0 {
-// 		pageNum = page
-// 	}
-
-// 	const dirPath = "converted"
-// 	folders, err := listFolders(dirPath, pageNum)
-// 	if err != nil {
-// 		sendError(w, r, err.Error())
-// 		return
-// 	}
-
-// 	data := &PageList{
-// 		Files:     folders,
-// 		TotalPage: (len(folders) + (AppConfig.VideoPerPage - 1)) / AppConfig.VideoPerPage,
-// 	}
-
-// 	if pageNum > 1 {
-// 		data.PrevPage = pageNum - 1
-// 	}
-
-// 	if len(folders) == AppConfig.VideoPerPage {
-// 		data.NextPage = pageNum + 1
-// 	}
-// 	if adminAuthenticated(r) {
-// 		data.CanDelete = 1
-// 	}
-
-// 	renderTemplate(w, "filelist", data)
-// }
-
-// func listFolders(dirPath string, pageNum int) ([]folderInfo, error) {
-// 	files, err := ioutil.ReadDir(dirPath)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	var infos []folderInfo
-// 	for _, file := range files {
-// 		if file.IsDir() {
-// 			info := folderInfo{
-// 				Name:    file.Name(),
-// 				ModTime: file.ModTime(),
-// 			}
-// 			infos = append(infos, info)
-// 		}
-// 	}
-
-// 	sort.Sort(folderInfos(infos))
-
-// 	startIndex := (pageNum - 1) * 10
-// 	if startIndex >= len(infos) {
-// 		if startIndex == 0 {
-// 			return nil, fmt.Errorf("No video available.")
-// 		}
-// 		return nil, fmt.Errorf("Invalid page number: %d", pageNum)
-// 	}
-// 	endIndex := startIndex + 10
-// 	if endIndex > len(infos) {
-// 		endIndex = len(infos)
-// 	}
-
-// 	return infos[startIndex:endIndex], nil
-// }
-
-// func editConfigHandler(w http.ResponseWriter, r *http.Request) {
-// 	if !adminAuthenticated(r) {
-// 		http.Redirect(w, r, "/auth", http.StatusSeeOther)
-// 		return
-// 	}
-
-// 	configMap := structToMap(&AppConfig)
-// 	if err := templateConfig.Execute(w, configMap); err != nil {
-// 		sendError(w, r, "Error during template generation")
-// 		return
-// 	}
-// }
-
-// func saveConfigHandler(w http.ResponseWriter, r *http.Request) {
-// 	if !adminAuthenticated(r) {
-// 		http.Redirect(w, r, "/auth", http.StatusSeeOther)
-// 		return
-// 	}
-
-// 	if err := r.ParseForm(); err != nil {
-// 		sendError(w, r, "Error while processing the form")
-// 		return
-// 	}
-
-// 	configMap := make(map[string]interface{})
-// 	for key, values := range r.PostForm {
-// 		value := values[0]
-// 		configMap[key] = value
-// 	}
-
-// 	config := mapToStruct(configMap)
-// 	if err := saveConfig("config.yaml", config); err != nil {
-// 		sendError(w, r, "Error while saving the configuration file")
-// 		return
-// 	}
-// 	AppConfig = *config
-// 	http.Redirect(w, r, "/", http.StatusSeeOther)
-// }
-
-func faviconHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, faviconPath)
-}
-
-func quequeSize(w http.ResponseWriter, r *http.Request) {
-	p := &PageQueque{
-		QuequeSize: quequelen,
-	}
-	renderTemplate(w, "queque", p)
+	app.render(w, "queque", p)
 }
 
 // deleteVideo handles DELETE requests (or GET with ?videoname=…) to remove
 // a video’s converted directory. It validates the name, attempts deletion,
 // logs any error, and then redirects back to the video list.
 func (app *Application) deleteVideo(w http.ResponseWriter, r *http.Request) {
-	// Only allow POST/DELETE methods
-	if r.Method != http.MethodPost && r.Method != http.MethodDelete {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	// // Only allow POST/DELETE methods
+	// if r.Method != http.MethodPost && r.Method != http.MethodDelete {
+	// 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	// 	return
+	// }
 
 	// Parse and validate the videoname parameter
 	videoname := r.URL.Query().Get("videoname")
@@ -451,7 +315,7 @@ func (app *Application) deleteVideo(w http.ResponseWriter, r *http.Request) {
 	if err := os.RemoveAll(dir); err != nil {
 		app.logger.Error("deleteVideo: failed to remove directory",
 			slog.String("path", dir),
-			err,
+			slog.String("error", err.Error()),
 		)
 		app.renderError(w, "Failed to delete video")
 		return

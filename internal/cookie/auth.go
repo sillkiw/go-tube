@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func hasRoleWithKey(r *http.Request, role string, keyIndex int) bool {
+func hasRoleWithKey(r *http.Request, role string, keyIndex int, users []user.User) bool {
 	cookie, err := r.Cookie("auth")
 	if err != nil {
 		// Cookie not found, assume the user is not authenticated
@@ -33,7 +33,7 @@ func hasRoleWithKey(r *http.Request, role string, keyIndex int) bool {
 	roleValue := parts[1]
 
 	// Verify that the user has the required role
-	for _, u := range user.Users {
+	for _, u := range users {
 		if u.Username == username && u.Role == roleValue {
 			return u.Role == role
 		}
@@ -46,13 +46,13 @@ func hasRoleWithKey(r *http.Request, role string, keyIndex int) bool {
 // userRole examines the request’s cookies in priority order.
 // It returns "admin" or "user" if a matching role cookie is found,
 // or an error if no valid role is present.
-func UserRole(r *http.Request) (string, error) {
+func UserRole(r *http.Request, users []user.User) (string, error) {
 	// Check for an admin first, then user
 	for key := range cookieKeys {
-		if hasRoleWithKey(r, "admin", key) {
+		if hasRoleWithKey(r, "admin", key, users) {
 			return "admin", nil
 		}
-		if hasRoleWithKey(r, "user", key) {
+		if hasRoleWithKey(r, "user", key, users) {
 			return "user", nil
 		}
 	}

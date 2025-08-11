@@ -15,11 +15,11 @@ import (
 func (app *Application) requireRole(roles []string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if len(roles) > 0 {
-			role, err := cookie.UserRole(r)
+			role, err := cookie.UserRole(r, app.users)
 			if err != nil || !slices.Contains(roles, role) {
 				app.logger.Info("access denied",
 					slog.String("role", role),
-					slog.String("error", err.Error()),
+					slog.Any("err", err),
 				)
 				http.Redirect(w, r, "/auth", http.StatusSeeOther)
 				return
@@ -36,4 +36,18 @@ func (app *Application) securedFileServer(prefix, dir string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix(prefix, http.FileServer(http.Dir(dir))).ServeHTTP(w, r)
 	})
+}
+
+func (app *Application) canDeleteQ(r *http.Request, roles []string) bool {
+	if len(roles) > 0 {
+		role, err := cookie.UserRole(r, app.users)
+		if err != nil || !slices.Contains(roles, role) {
+			app.logger.Info("access denied",
+				slog.String("role", role),
+				slog.String("error", err.Error()),
+			)
+			return false
+		}
+	}
+	return true
 }

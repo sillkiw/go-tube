@@ -29,7 +29,8 @@ func (app *Application) Routes() http.Handler {
 	)
 	mux.Handle(
 		"/deleteVideo",
-		app.requireRole(app.config.Auth.DeleteAllowedRoles,
+		app.requireRole(
+			app.config.Auth.DeleteAllowedRoles,
 			http.HandlerFunc(app.deleteVideo)),
 	)
 	mux.Handle(
@@ -43,7 +44,7 @@ func (app *Application) Routes() http.Handler {
 		"/converted/",
 		app.requireRole(
 			app.config.Auth.ViewAllowedRoles,
-			app.securedFileServer("/converted", app.config.UI.StaticPath),
+			app.securedFileServer("/converted", app.config.Video.ConvertPath),
 		),
 	)
 	for _, path := range []string{"/", "/lst"} {
@@ -51,14 +52,14 @@ func (app *Application) Routes() http.Handler {
 			path,
 			app.requireRole(
 				app.config.Auth.ViewAllowedRoles,
-				http.HandlerFunc(listFolderHandler),
+				http.HandlerFunc(app.listFolderHandler),
 			),
 		)
 	}
-	mux.HandleFunc("/favicon.ico", http.HandlerFunc(faviconHandler))
-	mux.HandleFunc("/queque", quequeSize)
-	mux.HandleFunc("/editconfig", editConfigHandler)
-	mux.HandleFunc("/save-config", saveConfigHandler)
+	mux.HandleFunc("/favicon.ico", http.HandlerFunc(app.faviconHandler))
+	mux.HandleFunc("/queque", app.quequeSize)
+	// mux.HandleFunc("/editconfig", editConfigHandler)
+	// mux.HandleFunc("/save-config", saveConfigHandler)
 	mux.HandleFunc("/auth", app.login)
 
 	return mux
