@@ -1,8 +1,8 @@
-# go-tube
+# GoTube
 
 Lightweight YouTube‑style app in Go — **upload → convert → stream** locally. It ships a minimal web UI, stores configuration in YAML, and includes a Dockerfile for containerized deployment.
 
----
+
 
 ## Features
 
@@ -11,7 +11,7 @@ Lightweight YouTube‑style app in Go — **upload → convert → stream** loca
 - **Video conversion** to multiple resolutions and formats (DASH/WebM)
 - Simple static **HTML/CSS/JS** web interface
 
----
+
 
 ## Tech stack
 
@@ -21,7 +21,7 @@ Lightweight YouTube‑style app in Go — **upload → convert → stream** loca
 - **Docker** (containerization)
 
 
----
+
 
 ## Repository layout
 
@@ -41,7 +41,7 @@ Lightweight YouTube‑style app in Go — **upload → convert → stream** loca
 ```
 
 
----
+
 
 ## Prerequisites
 
@@ -62,7 +62,7 @@ macOS (Homebrew):
 brew install ffmpeg gpac
 ```
 
----
+
 
 ## Configuration
 
@@ -72,7 +72,7 @@ All runtime settings live in `config.yaml`.
 
 `users.yaml` defines admin/user credentials and roles used for gated uploads or viewing. Keep this file outside the image when using Docker and **mount it** at runtime.
 
----
+
 
 ## Run locally
 
@@ -91,15 +91,6 @@ go build -o bin/go-tube ./cmd/web
 ./bin/go-tube
 ```
 
-Visit:
-
-```
-http://<host>:<ServerPort>/
-# or, if TLS is enabled
-https://<host>:<ServerPortTLS>/
-```
-
----
 
 ## Docker
 
