@@ -1,6 +1,7 @@
 package user
 
 import (
+	"log"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -12,17 +13,17 @@ type User struct {
 	Role     string `yaml:"role"`
 }
 
-// LoadUsersFromFile loads users from a YAML file and stores them in the global Users slice.
-func LoadUsersFromFile(path string) ([]User, error) {
+// MustLoad loads users from a YAML file and stores them in the global Users slice.
+func MustLoad(path string) []User {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		log.Fatalf("failed to read user files: %v", err)
 	}
 
 	var loaded []User
 	if err := yaml.Unmarshal(data, &loaded); err != nil {
-		return nil, err
+		log.Fatalf("failed to unmarshal user file: %v", err)
 	}
 
-	return loaded, nil
+	return loaded
 }
