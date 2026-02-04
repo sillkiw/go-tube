@@ -23,15 +23,3 @@ type UploadDetails struct {
 type Links struct {
 	Self string `json:"self,omitempty"`
 }
-
-func (c CreateRequest) GetTitle() string {
-	return c.Title
-}
-
-func (c CreateRequest) GetContentType() string {
-	return c.ContentType
-}
-
-func (c CreateRequest) GetSize() int64 {
-	return c.Size
-}

@@ -3,7 +3,7 @@ package videosapi
 import (
 	"log/slog"
 
-	valid "github.com/sillkiw/gotube/internal/validation"
+	valid "github.com/sillkiw/gotube/internal/http/api/videos/validation"
 	"github.com/sillkiw/gotube/internal/videos"
 )
 
