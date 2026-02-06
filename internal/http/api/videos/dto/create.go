@@ -14,10 +14,10 @@ type CreateResponse struct {
 }
 
 type UploadDetails struct {
-	Method  string            `json:"method"`
-	URL     string            `json:"url"`
-	Headers map[string]string `json:"headers,omitempty"`
-	MaxSize int64             `json:"max_size,omitempty"`
+	Method   string            `json:"method"`
+	URL      string            `json:"url"`
+	Headers  map[string]string `json:"headers,omitempty"`
+	MaxBytes int64             `json:"max_size,omitempty"`
 }
 
 type Links struct {

@@ -1,8 +1,7 @@
-package http
+package httpserver
 
 import (
 	"github.com/go-chi/chi/v5/middleware"
-	create "github.com/sillkiw/gotube/internal/http/api/create"
 	mvLogger "github.com/sillkiw/gotube/internal/http/middleware"
 )
 
@@ -13,7 +12,7 @@ func (s *Server) routes() {
 	s.router.Use(mvLogger.New(s.l))
 	s.router.Use(middleware.URLFormat)
 
-	s.router.Post("/api/videos", create.New(s.l))
+	s.router.Mount("/api/videos", s.vh.NewRouter())
 	// mux.Handle(
 	// 	"/upload",
 	// 	app.requireRole(

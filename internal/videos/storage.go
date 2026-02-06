@@ -1,5 +1,5 @@
 package videos
 
-type Repo interface {
+type videoDataSaver interface {
 	Create(v Video) (string, error)
 }

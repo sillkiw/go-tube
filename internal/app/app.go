@@ -1,24 +1,27 @@
 package app
 
 import (
-	"gotube/internal/config"
-	"gotube/internal/user"
-	"gotube/internal/video"
 	"log/slog"
+
+	"github.com/sillkiw/gotube/internal/config"
 )
 
-type Application struct {
-	log      *slog.Logger
-	cfg      *config.Config
-	videoSrv *video.Service
-	users    []user.User
+type App struct {
+	log *slog.Logger
+	cfg config.Config
 }
 
-func NewApplication(logger *slog.Logger, config *config.Config, users []user.User) *Application {
-	return &Application{
-		log:      logger,
-		cfg:      config,
-		videoSrv: video.NewService(logger, config),
-		users:    users,
+func New(logger *slog.Logger, config config.Config) (*App, error) {
+	a := &App{
+		log: logger,
+		cfg: config,
 	}
+
+	if err := a.initDB(); err != nil {
+
+	}
+}
+
+func (a *App) initDB() {
+
 }

@@ -9,6 +9,7 @@ import (
 	apierrors "github.com/sillkiw/gotube/internal/http/api/apierrors"
 	"github.com/sillkiw/gotube/internal/http/api/videos/dto"
 	"github.com/sillkiw/gotube/internal/http/httpjson"
+	"github.com/sillkiw/gotube/internal/videos"
 )
 
 func (vh *VideosHandler) create(w http.ResponseWriter, r *http.Request) {
@@ -22,26 +23,58 @@ func (vh *VideosHandler) create(w http.ResponseWriter, r *http.Request) {
 
 	err := render.DecodeJSON(r.Body, &req)
 	if err != nil {
-		l.Error("failed to decode request body",
+		l.Info("failed to decode request body",
 			slog.Any("err", err),
 		)
 		// TODO: more detailed json error response
-		errResp := apierrors.New("failed_decode_json", "failed to decode request body")
-		httpjson.WriteJSON(w, r, http.StatusBadRequest, errResp)
+		body := apierrors.New("failed_decode_json", "failed to decode request body")
+		httpjson.WriteJSON(w, r, http.StatusBadRequest, body)
 		return
 	}
 	l.Debug("request was decoded", slog.Any("req", req))
 
 	if verrs := vh.validator.CreateRequest(req); !verrs.Empty() {
-		l.Error("failed to validate request",
+		l.Info("failed to validate request",
 			slog.Any("err", verrs),
 		)
-		code, errResp := apierrors.Map(err)
-		httpjson.WriteJSON(w, r, code, errResp)
+		status, body := apierrors.Map(err)
+		httpjson.WriteJSON(w, r, status, body)
 		return
 	}
 
-	id, err
+	video := videos.Video{
+		Title:  req.Title,
+		Size:   req.Size,
+		Status: videos.StatusCreated,
+	}
 
+	id, err := vh.svc.Create(video)
+	if err != nil {
+		l.Error("failed to create video record",
+			slog.Any("err", err),
+		)
+		status, body := apierrors.Map(err)
+		httpjson.WriteJSON(w, r, status, body)
+		return
+	}
 
+	l.Info("video record created",
+		slog.String("id", id),
+	)
+	resp := dto.CreateResponse{
+		ID:     id,
+		Status: "created",
+		Upload: dto.UploadDetails{
+			Method: http.MethodPut,
+			URL:    "/api/videos/" + id + "/upload",
+			Headers: map[string]string{
+				"Content-Type": req.ContentType,
+			},
+			MaxBytes: vh.validator.Cfg.UplLimit.MaxSize,
+		},
+		Links: dto.Links{
+			Self: "/api/videos/" + id,
+		},
+	}
+	httpjson.WriteJSON(w, r, http.StatusCreated, resp)
 }

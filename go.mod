@@ -7,6 +7,7 @@ toolchain go1.23.10
 require (
 	github.com/go-chi/chi/v5 v5.2.4
 	github.com/go-chi/render v1.0.3
+	github.com/lib/pq v1.11.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 

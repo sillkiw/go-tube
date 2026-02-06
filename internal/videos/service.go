@@ -1,9 +1,20 @@
 package videos
 
 type Service struct {
-	repo Repo
+	storage   Storage
+	fileStore FileStore
 }
 
-func New(repo Repo) *Service {
-	return &Service{repo: repo}
+func New(storage Storage, fileStore FileStore) *Service {
+	return &Service{storage: storage, fileStore: fileStore}
+}
+
+func (s *Service) Create(v Video) (string, error) {
+	id, err := s.storage.Create(v)
+	if err != nil {
+		return "", err
+	}
+	name := "VD_" + id
+	s.fileStore.CreateFolder(name)
+	return id, err
 }

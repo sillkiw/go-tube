@@ -1,13 +1,13 @@
 package main
 
 import (
-	"gotube/internal/app"
-	"gotube/internal/config"
-	"gotube/internal/user"
 	"log"
 	"log/slog"
-	"net/http"
 	"os"
+
+	"github.com/sillkiw/gotube/internal/app"
+	"github.com/sillkiw/gotube/internal/config"
+	"github.com/sillkiw/gotube/internal/user"
 )
 
 // var (
@@ -26,49 +26,10 @@ func main() {
 
 	logger, errorLog := setupLogger(cfg.Env)
 
-	// Parse YAML user file
 	users := user.MustLoad(cfg.Auth.UsersFilePath)
 
-	// d, err := time.ParseDuration(cfg.Video.DeleteOld.CheckInterval)
-	// if err != nil {
-	// 	fmt.Println("Error parsing CheckOldEvery from config.yaml. Using default value (1h)", err)
-	// 	d = time.Hour
-	// }
-	// checkOldEvery = d
-	// if cfg.Video.DeleteOld.Enabled {
-	// 	go deleteOLD()
-	// }
+	app := app.New(logger, cfg, users)
 
-	// Initialize a new instance of application containing the dependencies
-	app := app.NewApplication(logger, cfg, users)
-
-	// go resetVideoUploadedCounter()
-	if cfg.Server.TLS.Enabled {
-		go func() {
-			tlsSrv := &http.Server{
-				Addr:     cfg.Server.TLS.BindAddress + ":" + cfg.Server.TLS.Port,
-				ErrorLog: errorLog,
-				Handler:  app.Routes(),
-			}
-			if err := tlsSrv.ListenAndServeTLS(cfg.Server.TLS.Cert, cfg.Server.TLS.Key); err != nil {
-				logger.Error("failed to start TLS server",
-					slog.Any("err", err),
-				)
-			}
-		}()
-	}
-	if cfg.Server.HTTP.Enabled {
-		httpSrv := &http.Server{
-			Addr:     cfg.Server.HTTP.BindAddress + ":" + cfg.Server.HTTP.Port,
-			ErrorLog: errorLog,
-			Handler:  app.Routes(),
-		}
-		if err := httpSrv.ListenAndServe(); err != nil {
-			logger.Error("failed to start server",
-				slog.Any("err", err),
-			)
-		}
-	}
 	logger.Error("server stopped")
 }
 

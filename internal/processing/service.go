@@ -1,9 +1,10 @@
 package video
 
 import (
-	"gotube/internal/config"
 	"log/slog"
 	"sync/atomic"
+
+	"github.com/sillkiw/gotube/internal/config"
 )
 
 type Service struct {
