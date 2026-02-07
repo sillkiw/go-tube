@@ -1,16 +1,11 @@
-env: "dev"  # "dev" or "prod"
+mode: "local"  # "dev" "prod" "local"
 
 server:
   http:
-    enabled: true
-    bind_address: "0.0.0.0"
-    port: 8085
-  tls:
-    enabled: false
-    bind_address: "0.0.0.0"
-    port: 8086
-    cert:   "/etc/letsencrypt/live/xxxx/fullchain.pem"
-    key:    "/etc/letsencrypt/live/xxxx/privkey.pem"
+    addr: "127.0.0.1:8085"
+  read_timeout: 10s
+  write_timeout: 10s
+  idle_timeout: 60s
 
 upload:
   path:            "./uploads"
@@ -19,7 +14,8 @@ upload:
   max_name_length: 30
 
 video:
-  convert_path:     "./converted"
+  dash_path:     "./data/dash"
+  raw_path:      "./data/raw"
   perpage:          10 #Nr of displayed video per page in Video list
   delete_original:  true
   delete_old:
@@ -51,10 +47,10 @@ validation:
     min_len: 1
     max_len: 100
   upload:
-    max_bytes: 2147483648
     min_bytes: 102400
+    max_bytes: 2147483648
     allowed_content_types:
-    - video/mp4
+    - "video/mp4"
 
 
 

@@ -3,6 +3,10 @@ package validation
 // Errors colect all validation error
 type Errors map[string]string
 
+func New() Errors {
+	return make(map[string]string)
+}
+
 func (e Errors) Error() string {
 	return "validation failed"
 }

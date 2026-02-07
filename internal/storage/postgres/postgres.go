@@ -35,7 +35,7 @@ func New(postgresSql string) (*Storage, error) {
 func (s *Storage) Create(v videos.Video) (string, error) {
 	const op = "storage.postgres.Create"
 	const q = `
-		INSERT INTO videos(title, size, status) 
+		INSERT INTO videos(title, video_size, video_status) 
 		VALUES ($1, $2, $3)
 		RETURNING id
 	`
@@ -49,4 +49,26 @@ func (s *Storage) Create(v videos.Video) (string, error) {
 		return "", fmt.Errorf("%s: insert: %w", op, err)
 	}
 	return id, nil
+}
+
+func (s *Storage) Get(id string) (videos.Video, error) {
+	const op = "storage.postgres.Get"
+	const q = `
+		SELECT * 
+		FROM videos
+		WHERE id = $1 
+	`
+	var vRec videos.Video
+	err := s.db.QueryRow(q, id).Scan(&vRec.ID, &vRec.Title, &vRec.Size, &vRec.Status)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return videos.Video{}, storage.ErrIdNotFound
+		}
+		return videos.Video{}, fmt.Errorf("%s: %w", op, err)
+	}
+	return vRec, nil
+}
+
+func (s *Storage) Close() error {
+	return s.db.Close()
 }

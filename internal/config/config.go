@@ -1,11 +1,11 @@
 package config
 
 import (
-	"flag"
 	"log"
 	"os"
 
-	"gopkg.in/yaml.v3"
+	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 )
 
 // Config is the root configuration for the application
@@ -16,34 +16,38 @@ import (
 // UI holds template/static paths
 // Auth controls role-based permissions
 type Config struct {
-	Env        string           `yaml:"mode"`
-	Server     ServerConfig     `yaml:"server"`
+	Env        string           `yaml:"mode" env:"MODE" env-default:"dev"`
+	Server     Server           `yaml:"server"`
 	Upload     UploadConfig     `yaml:"upload"`
 	Video      VideoConfig      `yaml:"video"`
 	Validation ValidationConfig `yaml:"validation"`
 	Auth       AuthConfig       `yaml:"auth"`
+	DB         Postgres         `yaml:"db"`
 }
 
-const configPathDefault = "./config/config.yaml"
+type Postgres struct {
+	DSN string `yaml:"url" env:"POSTGRES_URL"`
+}
 
-func MustLoad() Config {
-	configPath := flag.String("config", configPathDefault, "Path to configuration file")
-	flag.Parse()
+func MustLoad(configPath string) Config {
+	_ = godotenv.Load()
 
-	if _, err := os.Stat(*configPath); err != nil {
-		log.Fatalf("config file does not exist: %s", *configPath)
-	}
-
-	data, err := os.ReadFile(*configPath)
-	if err != nil {
-		log.Fatalf("failed to read config file: %v", err)
+	if _, err := os.Stat(configPath); err != nil {
+		log.Fatalf("config file does not exist: %s", configPath)
 	}
 
 	var cfg Config
-	if err = yaml.Unmarshal(data, &cfg); err != nil {
-		log.Fatalf("failed to unmarshal config: %v", err)
+	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+		log.Fatalf("failed to read config: %v", err)
 	}
 
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		log.Fatal("cannot read env: ", err)
+	}
+
+	if cfg.DB.DSN == "" {
+		log.Fatal("POSTGRES_URL is required")
+	}
 	return cfg
 
 }

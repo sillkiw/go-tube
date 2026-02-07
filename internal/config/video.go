@@ -43,7 +43,8 @@ type FFmpegConfig struct {
 // DASH toggles MPEG-DASH manifest generation
 // AllowEmbed toggles iframe embedding support
 type VideoConfig struct {
-	ConvertPath    string           `yaml:"convert_path"`
+	DashPath       string           `yaml:"dash_path"`
+	RawPath        string           `yaml:"raw_path"`
 	PerPage        int              `yaml:"perpage"`
 	DeleteOriginal bool             `yaml:"delete_original"`
 	DeleteOld      DeleteOldPolicy  `yaml:"delete_old"`

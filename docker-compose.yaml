@@ -1,0 +1,11 @@
+services:
+    postgres:
+        image: postgres:latest
+        environment:
+            POSTGRES_DB : "gotubedb"
+            POSTGRES_USER: "sillkiw"
+            POSTGRES_PASSWORD: "123qweasdzxc"
+        volumes:
+          - ./db:/docker-entrypoint-initdb.d:ro
+        ports:
+            - "5432:5432"

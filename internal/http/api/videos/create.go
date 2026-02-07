@@ -37,7 +37,7 @@ func (vh *VideosHandler) create(w http.ResponseWriter, r *http.Request) {
 		l.Info("failed to validate request",
 			slog.Any("err", verrs),
 		)
-		status, body := apierrors.Map(err)
+		status, body := apierrors.Map(verrs)
 		httpjson.WriteJSON(w, r, status, body)
 		return
 	}

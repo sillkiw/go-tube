@@ -1,36 +1,50 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/sillkiw/gotube/internal/app"
 	"github.com/sillkiw/gotube/internal/config"
-	"github.com/sillkiw/gotube/internal/user"
 )
-
-// var (
-// 	checkOldEvery = time.Hour //wait time before recheck  file deletion policies
-// )
 
 const (
 	envLocal = "local"
 	envDev   = "dev"
 	envProd  = "prod"
-	// sessionIDLength = 32
 )
 
 func main() {
-	cfg := config.MustLoad()
+	configPath := flag.String("config", "./config/config.yaml", "Path to configuration file")
+	flag.Parse()
+	cfg := config.MustLoad(*configPath)
 
 	logger, errorLog := setupLogger(cfg.Env)
 
-	users := user.MustLoad(cfg.Auth.UsersFilePath)
+	// users := user.MustLoad(cfg.Auth.UsersFilePath)
 
-	app := app.New(logger, cfg, users)
+	app, err := app.New(logger, errorLog, cfg)
+	if err != nil {
+		logger.Error("failed to init app",
+			slog.Any("err", err),
+		)
+		return
+	}
+	defer app.Close()
 
-	logger.Error("server stopped")
+	go func() {
+		if err := app.Run(); err != nil {
+			logger.Error("server error", slog.Any("err", err))
+		}
+	}()
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+	<-sig
 }
 
 func setupLogger(env string) (*slog.Logger, *log.Logger) {

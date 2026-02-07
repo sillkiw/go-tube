@@ -1,6 +1,8 @@
 package videosvalidation
 
 import (
+	"fmt"
+	"strings"
 	"unicode/utf8"
 
 	apivalid "github.com/sillkiw/gotube/internal/http/api/validation"
@@ -8,11 +10,11 @@ import (
 )
 
 func (v *Validator) CreateRequest(req dto.CreateRequest) apivalid.Errors {
-	errs := apivalid.Errors{}
+	errs := apivalid.New()
 	v.title(errs, req.Title)
 	v.contentType(errs, req.ContentType)
 	v.size(errs, req.Size)
-
+	fmt.Println(map[string]string(errs))
 	return errs
 }
 
@@ -34,8 +36,9 @@ func (v *Validator) contentType(errs apivalid.Errors, cntType string) {
 	if cntType == "" {
 		errs.Add("content_type", "required")
 	}
+
 	for _, t := range v.Cfg.UplLimit.AllowedContent {
-		if cntType == t {
+		if strings.EqualFold(cntType, t) {
 			return
 		}
 	}

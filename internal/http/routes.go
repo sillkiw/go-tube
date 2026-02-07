@@ -1,64 +1,24 @@
-package httpserver
+package http
 
 import (
+	"log/slog"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	videosapi "github.com/sillkiw/gotube/internal/http/api/videos"
 	mvLogger "github.com/sillkiw/gotube/internal/http/middleware"
 )
 
-func (s *Server) routes() {
-	s.router.Use(middleware.RequestID)
-	s.router.Use(middleware.RealIP)
-	s.router.Use(middleware.Recoverer)
-	s.router.Use(mvLogger.New(s.l))
-	s.router.Use(middleware.URLFormat)
+func NewRouter(logger *slog.Logger, vh *videosapi.VideosHandler) http.Handler {
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	router.Use(middleware.Recoverer)
+	router.Use(mvLogger.New(logger))
+	router.Use(middleware.URLFormat)
 
-	s.router.Mount("/api/videos", s.vh.NewRouter())
-	// mux.Handle(
-	// 	"/upload",
-	// 	app.requireRole(
-	// 		app.config.Auth.UploadAllowedRoles,
-	// 		http.HandlerFunc(app.upload),
-	// 	),
-	// )
-	// mux.Handle(
-	// 	"/vp",
-	// 	app.requireRole(
-	// 		app.config.Auth.ViewAllowedRoles,
-	// 		http.HandlerFunc(app.videoPlayerHandler),
-	// 	),
-	// )
-	// mux.Handle(
-	// 	"/send",
-	// 	app.requireRole(
-	// 		app.config.Auth.UploadAllowedRoles,
-	// 		http.HandlerFunc(app.showUploadForm),
-	// 	),
-	// )
-	// mux.Handle(
-	// 	"/deleteVideo",
-	// 	app.requireRole(
-	// 		app.config.Auth.DeleteAllowedRoles,
-	// 		http.HandlerFunc(app.deleteVideo)),
-	// )
-	// mux.Handle(
-	// 	"/converted/",
-	// 	app.requireRole(
-	// 		app.config.Auth.ViewAllowedRoles,
-	// 		app.securedFileServer("/converted", app.config.Video.ConvertPath),
-	// 	),
-	// )
-	// for _, path := range []string{"/", "/lst"} {
-	// 	mux.Handle(
-	// 		path,
-	// 		app.requireRole(
-	// 			app.config.Auth.ViewAllowedRoles,
-	// 			http.HandlerFunc(app.listFolderHandler),
-	// 		),
-	// 	)
-	// }
-	// mux.HandleFunc("/queque", app.quequeSize)
-	// // mux.HandleFunc("/editconfig", editConfigHandler)
-	// // mux.HandleFunc("/save-config", saveConfigHandler)
-	// mux.HandleFunc("/auth", app.login)
+	router.Mount("/api/videos", vh.NewRouter())
 
+	return router
 }
